@@ -1,23 +1,25 @@
-name: Build Android APK on Release
+name: Build and Release APK
+
+on:
+  push:
+    tags:
+      - '*'          # any tag, or use 'v*' if you only want v1.0.0-style tags
 
 permissions:
-  contents: write
-on:
-  release:
-    types: [published]   # runs when you publish a release (not just create a tag)
+  contents: write    # important: allows creating releases and uploading assets
 
 jobs:
   build-android:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.35.6'
+          flutter-version: 'stable'
 
       - name: Flutter pub get
         run: flutter pub get
@@ -25,13 +27,11 @@ jobs:
       - name: Build Android APK
         run: flutter build apk --release
 
-      # The release APK is usually at: build/app/outputs/flutter-apk/app-release.apk
-      - name: Rename APK
-        run: mv build/app/outputs/flutter-apk/app-release.apk app-${{ github.ref_name }}.apk
-
       - name: Upload APK to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: app-${{ github.ref_name }}.apk
+          tag_name: ${{ github.ref_name }}   # e.g. "0.0.1"
+          files: build/app/outputs/flutter-apk/app-release.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+

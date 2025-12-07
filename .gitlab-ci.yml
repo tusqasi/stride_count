@@ -15,7 +15,7 @@ workflow:
 # ---------- Build APK job ----------
 build_apk:
   stage: build
-  image: cirruslabs/flutter:3.35.6
+  image: ghcr.io/cirruslabs/flutter:3.35.6
   script:
     - flutter --version
     - flutter pub get
