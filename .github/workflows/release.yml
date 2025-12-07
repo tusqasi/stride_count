@@ -1,0 +1,35 @@
+name: Build Android APK on Release
+
+on:
+  release:
+    types: [published]   # runs when you publish a release (not just create a tag)
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.35.6'
+
+      - name: Flutter pub get
+        run: flutter pub get
+
+      - name: Build Android APK
+        run: flutter build apk --release
+
+      # The release APK is usually at: build/app/outputs/flutter-apk/app-release.apk
+      - name: Rename APK
+        run: mv build/app/outputs/flutter-apk/app-release.apk app-${{ github.ref_name }}.apk
+
+      - name: Upload APK to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: app-${{ github.ref_name }}.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
